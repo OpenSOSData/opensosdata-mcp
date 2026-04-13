@@ -1,0 +1,45 @@
+{
+  "name": "@opensosdata/mcp-server",
+  "version": "1.0.1",
+  "description": "OpenSOSData MCP Server - US Business Entity Search across all 53 jurisdictions",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "opensosdata-mcp": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/http-server.js",
+    "dev": "ts-node src/http-server.ts"
+  },
+  "keywords": [
+    "mcp",
+    "secretary-of-state",
+    "business-entity",
+    "kyb",
+    "llc",
+    "corporation",
+    "opensosdata"
+  ],
+  "author": "OpenSOSData LLC",
+  "license": "MIT",
+  "homepage": "https://opensosdata.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/opensosdata/mcp-server"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "axios": "^1.15.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.6.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.2"
+  }
+}
