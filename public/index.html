@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP Server | OpenSOSData</title>
+<meta name="description" content="Connect Claude, ChatGPT, and AI agents to real-time US business entity data via MCP. 53 jurisdictions. $0.0314 per lookup.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+  :root, [data-theme="light"] {
+    --bg: #ffffff;
+    --bg-secondary: #faf9ff;
+    --bg-card: #ffffff;
+    --accent: #7C3AED;
+    --accent-light: #8B5CF6;
+    --accent-pale: #EDE9FE;
+    --accent-dark: #6D28D9;
+    --text-primary: #111827;
+    --text-secondary: #6B7280;
+    --text-muted: #9CA3AF;
+    --border: #E5E7EB;
+    --border-accent: #C4B5FD;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --nav-bg: rgba(255,255,255,0.85);
+    --code-bg: #1e1e2e;
+    --hero-gradient: linear-gradient(180deg, #111827 0%, #374151 100%);
+  }
+  [data-theme="dark"] {
+    --bg: #0D0D14;
+    --bg-secondary: #13121F;
+    --bg-card: #1A1826;
+    --accent: #8B5CF6;
+    --accent-light: #A78BFA;
+    --accent-pale: #1E1B3A;
+    --accent-dark: #7C3AED;
+    --text-primary: #F9FAFB;
+    --text-secondary: #9CA3AF;
+    --text-muted: #6B7280;
+    --border: #2D2B45;
+    --border-accent: #4C1D95;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    --nav-bg: rgba(13,13,20,0.85);
+    --code-bg: #0e0e18;
+    --hero-gradient: linear-gradient(180deg, #F9FAFB 0%, #D1D5DB 100%);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--text-primary); font-family: 'Inter', system-ui, -apple-system, sans-serif; line-height: 1.6; -webkit-font-smoothing: antialiased; transition: background 0.2s, color 0.2s; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { color: var(--accent-dark); }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+  /* Nav - identical to landing page */
+  nav.top {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--nav-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav.top .container { display: flex; align-items: center; justify-content: space-between; height: 72px; }
+  nav.top .brand { font-weight: 800; font-size: 20px; color: var(--text-primary); letter-spacing: -0.01em; }
+  nav.top .brand span { color: var(--accent); }
+  nav.top .links { display: flex; gap: 28px; align-items: center; }
+  nav.top .links a { color: var(--text-secondary); font-weight: 500; font-size: 15px; }
+  nav.top .links a:hover { color: var(--text-primary); }
+  .btn { display: inline-block; padding: 12px 22px; border-radius: 8px; font-weight: 600; font-size: 15px; border: 1px solid transparent; transition: all 0.15s ease; cursor: pointer; }
+  .btn-primary { background: var(--accent); color: #ffffff; }
+  .btn-primary:hover { background: var(--accent-dark); color: #ffffff; }
+  .nav-toggle { display: none; background: none; border: 0; color: var(--text-primary); font-size: 24px; cursor: pointer; }
+  #theme-toggle { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; cursor: pointer; color: var(--text-secondary); font-size: 14px; transition: border-color 0.2s; }
+  #theme-toggle:hover { border-color: var(--accent); }
+
+  /* Hero */
+  .hero { padding: 60px 0 64px; text-align: center; }
+  .badge { display: inline-block; padding: 6px 14px; border-radius: 999px; background: var(--accent-pale); border: 1px solid var(--border-accent); color: var(--accent); font-size: 13px; font-weight: 500; margin-bottom: 24px; }
+  .hero h1 { font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; max-width: 800px; margin: 0 auto 20px; background: var(--hero-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero p { font-size: 18px; color: var(--text-secondary); max-width: 600px; margin: 0 auto; }
+
+  /* Setup section */
+  .setup { max-width: 720px; margin: 0 auto; padding: 0 24px 60px; }
+  .setup h2 { font-size: 22px; font-weight: 700; margin-bottom: 20px; text-align: center; }
+  .code-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 14px; line-height: 1.7; overflow-x: auto; margin-bottom: 12px; position: relative; color: #e2e8f0; }
+  .code-block .comment { color: #6B7280; }
+  .code-block .string { color: #A78BFA; }
+  .code-block .key { color: #7DD3FC; }
+  .code-copy { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.1); border: none; color: #9CA3AF; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+  .code-copy:hover { background: var(--accent); color: #fff; }
+  .step-label { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; }
+
+  /* Tools */
+  .tools { max-width: 900px; margin: 0 auto; padding: 0 24px 60px; }
+  .tools h2 { font-size: 22px; font-weight: 700; margin-bottom: 24px; text-align: center; }
+  .tool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+  .tool-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; box-shadow: var(--card-shadow); transition: border-color 0.2s; }
+  .tool-card:hover { border-color: var(--accent); }
+  .tool-name { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 14px; font-weight: 600; color: var(--accent); margin-bottom: 8px; }
+  .tool-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+
+  /* Info section */
+  .info-section { max-width: 720px; margin: 0 auto; padding: 0 24px 60px; }
+  .info-section h2 { font-size: 22px; font-weight: 700; margin-bottom: 16px; text-align: center; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .info-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; box-shadow: var(--card-shadow); }
+  .info-item .label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .info-item .value { font-size: 16px; font-weight: 600; }
+
+  /* Footer - identical to landing page */
+  footer { background: var(--bg-secondary); padding: 48px 0 32px; border-top: 1px solid var(--border); }
+  footer .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+  footer .brand { font-weight: 800; font-size: 18px; color: var(--text-primary); }
+  footer .flinks { display: flex; gap: 24px; flex-wrap: wrap; }
+  footer .flinks a { color: var(--text-secondary); font-size: 14px; }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    nav.top .links { display: none; }
+    nav.top .links.open { display: flex; flex-direction: column; position: absolute; top: 72px; left: 0; right: 0; background: var(--bg); padding: 24px; border-bottom: 1px solid var(--border); z-index: 99; }
+    .nav-toggle { display: block; }
+    .info-grid { grid-template-columns: 1fr; }
+    .tool-grid { grid-template-columns: 1fr; }
+  }
+</style>
+<script>
+  var saved = localStorage.getItem('osd-theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+</script>
+</head>
+<body>
+
+<nav class="top">
+  <div class="container">
+    <a href="/" style="text-decoration:none;"><div class="brand">Open<span>SOS</span>Data</div></a>
+    <button class="nav-toggle" onclick="document.querySelector('.links').classList.toggle('open')">&#9776;</button>
+    <div class="links">
+      <a href="/openapi.yaml">API Docs</a>
+      <a href="/#pricing">Pricing</a>
+      <a href="/#faq">FAQ</a>
+      <button id="theme-toggle" onclick="toggleTheme()"><span id="theme-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></span></button>
+      <a href="https://app.opensosdata.com/#signup" class="btn btn-primary" style="color:#ffffff;">Sign Up</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="badge">Model Context Protocol</div>
+    <h1>Connect AI agents to real-time US business data</h1>
+    <p>Give Claude, ChatGPT, and any MCP-compatible AI agent the ability to search Secretary of State records across all 53 US jurisdictions in real time.</p>
+  </div>
+</section>
+
+<section class="setup">
+  <h2>Quick Setup</h2>
+
+  <div class="step-label">Claude Desktop / claude_desktop_config.json</div>
+  <div class="code-block">
+    <button class="code-copy" onclick="navigator.clipboard.writeText(document.getElementById('c1').innerText)">Copy</button>
+    <pre id="c1"><span class="comment">// Add to mcpServers in your config</span>
+{
+  <span class="key">"opensosdata"</span>: {
+    <span class="key">"url"</span>: <span class="string">"https://mcp.opensosdata.com/mcp"</span>
+  }
+}</pre>
+  </div>
+
+  <div class="step-label">Claude Code</div>
+  <div class="code-block">
+    <button class="code-copy" onclick="navigator.clipboard.writeText('claude mcp add opensosdata https://mcp.opensosdata.com/mcp')">Copy</button>
+    <pre>claude mcp add opensosdata https://mcp.opensosdata.com/mcp</pre>
+  </div>
+
+  <div class="step-label">Cursor / VS Code</div>
+  <div class="code-block">
+    <button class="code-copy" onclick="navigator.clipboard.writeText(document.getElementById('c2').innerText)">Copy</button>
+    <pre id="c2"><span class="comment">// .cursor/mcp.json or .vscode/mcp.json</span>
+{
+  <span class="key">"servers"</span>: {
+    <span class="key">"opensosdata"</span>: {
+      <span class="key">"url"</span>: <span class="string">"https://mcp.opensosdata.com/mcp"</span>
+    }
+  }
+}</pre>
+  </div>
+</section>
+
+<section class="tools">
+  <h2>Available Tools</h2>
+  <div class="tool-grid">
+    <div class="tool-card">
+      <div class="tool-name">search_business_entity</div>
+      <div class="tool-desc">Search for a US business entity by name in a specific state. Returns entity name, ID, status, type, registered agent, and address.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">check_entity_status</div>
+      <div class="tool-desc">Verify if a business entity is active, inactive, or dissolved. Ideal for KYB compliance, due diligence, and vendor verification.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">batch_search</div>
+      <div class="tool-desc">Search for multiple business entities simultaneously across different states. Up to 10 entities per batch.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">list_supported_jurisdictions</div>
+      <div class="tool-desc">Returns all 53 US jurisdictions with live coverage, including all 50 states, DC, Puerto Rico, and US Virgin Islands.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">get_jurisdictions_for_region</div>
+      <div class="tool-desc">Get jurisdictions in a specific US region. Useful for multi-state compliance checks and regional coverage.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">get_account_balance</div>
+      <div class="tool-desc">Check your current credit balance and remaining lookups. Returns a link to add funds when needed.</div>
+    </div>
+  </div>
+</section>
+
+<section class="info-section">
+  <h2>Details</h2>
+  <div class="info-grid">
+    <div class="info-item">
+      <div class="label">Endpoint</div>
+      <div class="value" style="font-size:14px;word-break:break-all;"><a href="https://mcp.opensosdata.com/mcp">mcp.opensosdata.com/mcp</a></div>
+    </div>
+    <div class="info-item">
+      <div class="label">Transport</div>
+      <div class="value">Streamable HTTP</div>
+    </div>
+    <div class="info-item">
+      <div class="label">Cost per Lookup</div>
+      <div class="value">$0.0314</div>
+    </div>
+    <div class="info-item">
+      <div class="label">Free on Signup</div>
+      <div class="value">10 lookups</div>
+    </div>
+    <div class="info-item">
+      <div class="label">Coverage</div>
+      <div class="value">53 jurisdictions</div>
+    </div>
+    <div class="info-item">
+      <div class="label">Auth</div>
+      <div class="value">API key via dashboard</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="brand"><span style="color:var(--text-primary);">Open</span><span style="color:var(--accent);">SOS</span><span style="color:var(--text-primary);">Data</span></div>
+      <div class="flinks">
+        <a href="/openapi.yaml">API Docs</a>
+        <a href="/#pricing">Pricing</a>
+        <a href="/vs/opencorporates/">vs OpenCorporates</a>
+        <a href="/vs/cobalt/">vs Cobalt</a>
+        <a href="/vs/middesk/">vs Middesk</a>
+        <a href="/states/">States</a>
+        <a href="/blog/">Blog</a>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;margin-top:24px;margin-left:auto;font-size:13px;color:var(--text-muted);flex-wrap:wrap;width:fit-content;"><span>&copy; 2026 OPENSOSDATA LLC.</span><a href="/terms" style="color:var(--text-muted);">Terms of Service</a><a href="/privacy" style="color:var(--text-muted);">Privacy Policy</a></div>
+  </div>
+</footer>
+
+<script>
+  function toggleTheme() {
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('theme-icon').innerHTML = isDark ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    localStorage.setItem('osd-theme', isDark ? 'light' : 'dark');
+  }
+  // Set correct icon on load
+  if (localStorage.getItem('osd-theme') === 'dark') {
+    document.getElementById('theme-icon').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  }
+</script>
+</body>
+</html>
