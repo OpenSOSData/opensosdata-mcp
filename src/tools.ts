@@ -111,6 +111,29 @@ export async function searchEntity(entityName: string, state: string, apiKey?: s
   return resp;
 }
 
+export const UCC_SUPPORTED_STATES = [
+  'AK','AL','AZ','CA','CO','CT','FL','IA','ID','IN',
+  'KY','MA','MO','MS','MT','NC','ND','NJ','NM','NY',
+  'OH','OR','PA','RI','TN','VA'
+];
+
+export async function searchUCC(debtorName: string, state: string, maxResults?: number, apiKey?: string): Promise<any> {
+  const key = apiKey || getApiKey();
+  const res = await axios.post(
+    `${API_BASE}/v1/ucc/search`,
+    { debtorName, state: state.toUpperCase(), maxResults: maxResults || 10 },
+    {
+      headers: {
+        'x-api-key': key,
+        'Content-Type': 'application/json',
+        'x-mcp-client': 'opensosdata-mcp'
+      },
+      timeout: 260000
+    }
+  );
+  return res.data;
+}
+
 export const toolDefinitions = [
   {
     name: 'search_business_entity',
@@ -129,7 +152,7 @@ export const toolDefinitions = [
       },
       required: ['entity_name', 'state']
     },
-    annotations: { readOnlyHint: true, destructiveHint: false }
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false, title: 'Search Business Entity' }
   },
   {
     name: 'list_supported_jurisdictions',
@@ -139,7 +162,7 @@ export const toolDefinitions = [
       properties: {},
       required: [] as string[]
     },
-    annotations: { readOnlyHint: true, destructiveHint: false }
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false, title: 'List Supported Jurisdictions' }
   },
   {
     name: 'check_entity_status',
@@ -158,7 +181,7 @@ export const toolDefinitions = [
       },
       required: ['entity_name', 'state']
     },
-    annotations: { readOnlyHint: true, destructiveHint: false }
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false, title: 'Check Entity Status' }
   },
   {
     name: 'batch_search',
@@ -182,7 +205,7 @@ export const toolDefinitions = [
       },
       required: ['searches']
     },
-    annotations: { readOnlyHint: true, destructiveHint: false }
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false, title: 'Batch Entity Search' }
   },
   {
     name: 'get_jurisdictions_for_region',
@@ -198,7 +221,49 @@ export const toolDefinitions = [
       },
       required: ['region']
     },
-    annotations: { readOnlyHint: true, destructiveHint: false }
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false, title: 'Get Jurisdictions for Region' }
+  },
+  {
+    name: 'search_ucc_filings',
+    description: 'Search UCC (Uniform Commercial Code) lien filings by debtor name in a specific US state. Returns filing number, status (active/lapsed/terminated), debtor and secured party details, filing and lapse dates, and collateral description. Useful for due diligence, lien searches, and credit risk assessment.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        debtor_name: {
+          type: 'string',
+          description: 'The debtor name to search for (person or business)'
+        },
+        state: {
+          type: 'string',
+          description: `Two-letter US state code. Supported: ${UCC_SUPPORTED_STATES.join(', ')}`
+        },
+        max_results: {
+          type: 'number',
+          description: 'Maximum number of filings to return (1-30, default 10)'
+        }
+      },
+      required: ['debtor_name', 'state']
+    },
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false, title: 'Search UCC Filings' }
+  },
+  {
+    name: "check_name_availability",
+    description: "Check whether a business name is available to register in a US state or territory. Returns available: true/false plus up to 10 conflicting entity matches sorted by status (active first). Useful for business formation workflows, pre-registration research, and name conflict detection. Always queries live portal data.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        entity_name: {
+          type: "string",
+          description: "Business name to check availability for"
+        },
+        state: {
+          type: "string",
+          description: "Two-letter US state or territory code (e.g. CA, DE, NY)"
+        }
+      },
+      required: ["entity_name", "state"]
+    },
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false, title: 'Check Name Availability' }
   }
 ];
 
@@ -308,6 +373,77 @@ export async function handleToolCall(name: string, args: Record<string, any>, ap
     return {
       text: JSON.stringify({ region, jurisdictions, count: jurisdictions.length }, null, 2)
     };
+  }
+
+  if (name === 'search_ucc_filings') {
+    const { debtor_name, state, max_results } = args;
+    const upper = (state as string).toUpperCase();
+    if (!UCC_SUPPORTED_STATES.includes(upper)) {
+      return { text: `UCC search is not supported for state: ${state}. Supported states: ${UCC_SUPPORTED_STATES.join(', ')}`, isError: true };
+    }
+    const result = await searchUCC(debtor_name, upper, max_results, apiKey);
+    if (!result.success) {
+      return { text: result.error || `UCC search failed for "${debtor_name}" in ${upper}.`, isError: true };
+    }
+    if (!result.results || result.results.length === 0) {
+      return { text: `No UCC filings found for "${debtor_name}" in ${upper}.` };
+    }
+    const filings = result.results.map((f: any) => ({
+      fileNumber: f.fileNumber,
+      status: f.status,
+      debtorName: f.debtorName,
+      debtorAddress: f.debtorAddress,
+      debtorType: f.debtorType,
+      securedPartyName: f.securedPartyName,
+      securedPartyAddress: f.securedPartyAddress,
+      filingDate: f.filingDate,
+      lapseDate: f.lapseDate,
+      collateralDescription: f.collateralDescription,
+      jurisdiction: f.jurisdiction,
+      sourceUrl: f.sourceUrl
+    }));
+    return {
+      text: JSON.stringify({
+        totalFound: result.totalFound,
+        jurisdiction: result.jurisdiction,
+        cached: result.cached,
+        filings
+      }, null, 2)
+    };
+  }
+
+  if (name === "check_name_availability") {
+    const { entity_name, state } = args;
+    const upper = (state as string).toUpperCase();
+    if (!VALID_STATES.includes(upper)) {
+      return { text: `Invalid state code: ${state}. Use a valid 2-letter US state/territory code.`, isError: true };
+    }
+    const key = apiKey || getApiKey();
+    const res = await axios.post(
+      `${API_BASE}/v1/name-availability`,
+      { entity_name, state: upper },
+      {
+        headers: { "x-api-key": key, "Content-Type": "application/json" },
+        timeout: 120000
+      }
+    );
+    const data = res.data as any;
+    if (!data.success && data.error) {
+      return { text: `Error: ${data.error}`, isError: true };
+    }
+    const status = data.available ? "✅ Available" : "❌ Name Taken";
+    let result = `${status}\n\nSearched: "${data.searchedName}" in ${data.state}\n`;
+    if (data.statusNote) result += `\nℹ️  ${data.statusNote}\n`;
+    if (data.variationNote) result += `\n⚠️  ${data.variationNote}\n`;
+    if (data.warning) result += `\n🔴 ${data.warning}\n`;
+    if (data.conflictingEntities?.length > 0) {
+      result += `\nSimilar Name Records Found:\n`;
+      data.conflictingEntities.forEach((e: any) => {
+        result += `• ${e.entityName} — ${e.status || "Unknown"} (${e.entityId})\n`;
+      });
+    }
+    result += `\nCost: ${data.cost} | Balance: ${data.walletBalance}`;
+    return { text: result };
   }
 
   return { text: `Unknown tool: ${name}`, isError: true };
