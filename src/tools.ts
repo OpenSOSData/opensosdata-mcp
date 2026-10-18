@@ -264,6 +264,51 @@ export const toolDefinitions = [
       required: ["entity_name", "state"]
     },
     annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false, title: 'Check Name Availability' }
+  },
+  {
+    name: 'create_agent_account',
+    description: 'Create a new OpenSOSData agent account. This creates a pay-first agent account with ZERO free lookup allowance — the wallet must be funded via top_up_wallet before any lookups will succeed. Returns the osd_ API key exactly once; it cannot be retrieved again. Requires an email address.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        email: {
+          type: 'string',
+          description: 'Email address for the new agent account'
+        },
+        name: {
+          type: 'string',
+          description: 'Optional display name for the account'
+        }
+      },
+      required: ['email']
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true, title: 'Create Agent Account' }
+  },
+  {
+    name: 'top_up_wallet',
+    description: 'INITIATES A REAL PAYMENT to add wallet credit to an OpenSOSData agent account. Accepts a tier selection: starter ($50, 500 lookups), growth ($100, 1333 lookups), scale ($250, 5000 lookups), or enterprise ($500, 15923 lookups). Returns a payment challenge that must be completed to finalize the top-up. This spends real money.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        tier: {
+          type: 'string',
+          enum: ['starter', 'growth', 'scale', 'enterprise'],
+          description: 'Payment tier: starter ($50), growth ($100), scale ($250), enterprise ($500)'
+        }
+      },
+      required: ['tier']
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true, title: 'Top Up Wallet' }
+  },
+  {
+    name: 'check_balance',
+    description: 'Check the current wallet balance and remaining lookup count for the authenticated OpenSOSData account.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {},
+      required: [] as string[]
+    },
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false, title: 'Check Balance' }
   }
 ];
 
@@ -444,6 +489,117 @@ export async function handleToolCall(name: string, args: Record<string, any>, ap
     }
     result += `\nCost: ${data.cost} | Balance: ${data.walletBalance}`;
     return { text: result };
+  }
+
+  if (name === 'create_agent_account') {
+    const { email, name: accountName } = args;
+    if (!email || typeof email !== 'string') {
+      return { text: 'Email is required to create an agent account.', isError: true };
+    }
+    try {
+      const res = await axios.post(
+        `${API_BASE}/v1/agent/signup`,
+        { email, name: accountName || undefined },
+        {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 30000,
+          validateStatus: () => true
+        }
+      );
+      if (res.status === 404) {
+        return { text: 'This capability is not yet available. Agent self-service signup has not been enabled.' };
+      }
+      if (res.status === 409) {
+        return { text: 'An account with this email already exists.', isError: true };
+      }
+      if (res.status === 201 && res.data?.success) {
+        return {
+          text: JSON.stringify({
+            success: true,
+            userId: res.data.userId,
+            apiKey: res.data.apiKey,
+            note: 'IMPORTANT: This API key is shown only once and cannot be retrieved again. This is a pay-first account with zero balance — fund it via top_up_wallet before performing lookups.'
+          }, null, 2)
+        };
+      }
+      return { text: res.data?.error || `Signup failed (HTTP ${res.status})`, isError: true };
+    } catch (err: any) {
+      return { text: `Error creating agent account: ${err.message}`, isError: true };
+    }
+  }
+
+  if (name === 'top_up_wallet') {
+    const { tier } = args;
+    const validTiers = ['starter', 'growth', 'scale', 'enterprise'];
+    if (!tier || !validTiers.includes(tier)) {
+      return { text: `Invalid tier. Choose one of: ${validTiers.join(', ')}`, isError: true };
+    }
+    const key = apiKey || getApiKey();
+    if (!key) {
+      return { text: 'API key is required. Authenticate first or provide an osd_ API key.', isError: true };
+    }
+    try {
+      const res = await axios.post(
+        `${API_BASE}/v1/mpp/topup`,
+        { tier },
+        {
+          headers: {
+            'x-api-key': key,
+            'Content-Type': 'application/json'
+          },
+          timeout: 30000,
+          validateStatus: () => true
+        }
+      );
+      if (res.status === 404) {
+        return { text: 'This capability is not yet available. Agent wallet top-up has not been enabled.' };
+      }
+      // MPP challenge flow returns various statuses (402 for payment challenge, 200 for receipt)
+      return {
+        text: JSON.stringify({
+          status: res.status,
+          ...(res.data || {})
+        }, null, 2)
+      };
+    } catch (err: any) {
+      return { text: `Error initiating top-up: ${err.message}`, isError: true };
+    }
+  }
+
+  if (name === 'check_balance') {
+    const key = apiKey || getApiKey();
+    if (!key) {
+      return { text: 'API key is required. Authenticate first or provide an osd_ API key.', isError: true };
+    }
+    try {
+      const res = await axios.get(
+        `${API_BASE}/v1/account/balance`,
+        {
+          headers: {
+            'x-api-key': key,
+            'x-mcp-client': 'opensosdata-mcp'
+          },
+          timeout: 15000,
+          validateStatus: () => true
+        }
+      );
+      if (res.status === 404) {
+        return { text: 'This capability is not yet available.' };
+      }
+      if (!res.data?.success) {
+        return { text: res.data?.error || `Balance check failed (HTTP ${res.status})`, isError: true };
+      }
+      return {
+        text: JSON.stringify({
+          balance: res.data.balanceDisplay,
+          lookupsRemaining: res.data.lookupsRemaining,
+          pricePerLookup: res.data.pricePerLookup,
+          accountType: res.data.type
+        }, null, 2)
+      };
+    } catch (err: any) {
+      return { text: `Error checking balance: ${err.message}`, isError: true };
+    }
   }
 
   return { text: `Unknown tool: ${name}`, isError: true };
