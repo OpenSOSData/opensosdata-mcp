@@ -1,0 +1,80 @@
+{
+  "name": "OpenSOSData",
+  "description": "Search US business entity records across all 53 jurisdictions (50 states + DC + PR + USVI) in real time. KYB verification, entity status checks, UCC lien searches, name availability, and batch lookups from official Secretary of State portals.",
+  "version": "1.0.1",
+  "url": "https://mcp.opensosdata.com/mcp",
+  "transport": {
+    "type": "streamable-http"
+  },
+  "authentication": {
+    "type": "oauth2.1",
+    "oauth_discovery_url": "https://mcp.opensosdata.com/.well-known/oauth-authorization-server"
+  },
+  "tools": [
+    {
+      "name": "search_business_entity",
+      "description": "Search for a US business entity by name in a specific state or territory. Returns entity name, ID, status, type, registered agent, and address. Covers all 53 US jurisdictions including DC, Puerto Rico, and US Virgin Islands.",
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "openWorldHint": false }
+    },
+    {
+      "name": "check_entity_status",
+      "description": "Verify if a business entity is active, inactive, or dissolved in a specific US jurisdiction. Ideal for KYB compliance, due diligence, and vendor verification workflows.",
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "openWorldHint": false }
+    },
+    {
+      "name": "batch_search",
+      "description": "Search for multiple business entities simultaneously across different states. Maximum 10 entities per batch. Returns results for each entity in order.",
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "openWorldHint": false }
+    },
+    {
+      "name": "list_supported_jurisdictions",
+      "description": "Returns all 53 US jurisdictions with live business entity search coverage, including all 50 states, Washington DC, Puerto Rico, and US Virgin Islands.",
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "openWorldHint": false }
+    },
+    {
+      "name": "get_jurisdictions_for_region",
+      "description": "Get the list of US jurisdictions in a specific region. Useful for multi-state compliance checks and understanding regional coverage.",
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "openWorldHint": false }
+    },
+    {
+      "name": "search_ucc_filings",
+      "description": "Search UCC (Uniform Commercial Code) lien filings by debtor name in a specific US state. Returns filing number, status, debtor and secured party details, filing and lapse dates, and collateral description.",
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "openWorldHint": false }
+    },
+    {
+      "name": "check_name_availability",
+      "description": "Check whether a business name is available to register in a US state or territory. Returns availability status plus conflicting entity matches.",
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "openWorldHint": false }
+    },
+    {
+      "name": "create_agent_account",
+      "description": "Create a new OpenSOSData agent account. Returns an API key (shown once). Pay-first account — fund via top_up_wallet before lookups.",
+      "annotations": { "readOnlyHint": false, "destructiveHint": false, "openWorldHint": true }
+    },
+    {
+      "name": "top_up_wallet",
+      "description": "Initiates a real payment to add wallet credit to an OpenSOSData agent account. Tiers: starter ($50), growth ($100), scale ($250), enterprise ($500).",
+      "annotations": { "readOnlyHint": false, "destructiveHint": false, "openWorldHint": true }
+    },
+    {
+      "name": "check_balance",
+      "description": "Check the current wallet balance and remaining lookup count for the authenticated OpenSOSData account.",
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "openWorldHint": false }
+    }
+  ],
+  "homepage": "https://opensosdata.com",
+  "documentation": "https://opensosdata.com/mcp",
+  "privacy_policy": "https://opensosdata.com/privacy",
+  "terms_of_service": "https://opensosdata.com/terms",
+  "support": {
+    "email": "support@opensosdata.com",
+    "issues": "https://github.com/OpenSOSData/opensosdata-mcp/issues"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/OpenSOSData/opensosdata-mcp",
+  "pricing": {
+    "model": "pay-per-use",
+    "free_tier": "10 lookups on signup",
+    "per_lookup": "$0.0314 USD"
+  }
+}
