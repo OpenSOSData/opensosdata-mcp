@@ -280,19 +280,21 @@ function renderConsentPage(
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Authorize - OpenSOSData</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext x='32' y='32' text-anchor='middle' dominant-baseline='central' font-family='Inter,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif' font-size='60' font-weight='800' fill='%237C3AED'%3EO%3C/text%3E%3C/svg%3E">
   <style>
+    @font-face { font-family: 'Inter'; font-display: optional; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f7; color: #1a1a2e; min-height: 100vh; display: flex; flex-direction: column; }
-    .header { background: #09090f; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
-    .header h1 { color: #fff; font-size: 18px; font-weight: 600; }
-    .header .logo { width: 28px; height: 28px; flex-shrink: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0D0D14; color: #e5e7eb; min-height: 100vh; display: flex; flex-direction: column; }
+    .header { padding: 16px 24px; display: flex; align-items: center; }
+    .brand { font-family: 'Inter', system-ui, -apple-system, sans-serif; font-weight: 800; font-size: 20px; color: #F9FAFB; letter-spacing: -0.01em; }
+    .brand .sos { color: #7C3AED; }
     .container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; }
-    .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 32px; max-width: 420px; width: 100%; }
-    .card h2 { font-size: 20px; margin-bottom: 8px; text-align: center; }
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.3); padding: 32px; max-width: 420px; width: 100%; color: #1a1a2e; }
+    .card h2 { font-size: 20px; margin-bottom: 8px; text-align: center; color: #1a1a2e; }
     .card p { color: #555; font-size: 14px; margin-bottom: 20px; text-align: center; }
     .client-name { color: #7C3AED; font-weight: 600; }
-    label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; }
-    input[type="password"] { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s; }
+    label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; color: #1a1a2e; }
+    input[type="password"] { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s; color: #1a1a2e; background: #fff; }
     input[type="password"]:focus { border-color: #7C3AED; }
     .btn { display: block; width: 100%; padding: 12px; background: #7C3AED; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 16px; transition: background 0.2s; }
     .btn:hover { background: #6D28D9; }
@@ -301,14 +303,13 @@ function renderConsentPage(
     .signup a { color: #7C3AED; text-decoration: none; }
     .signup a:hover { text-decoration: underline; }
     .error { background: #fef2f2; border: 1px solid #fca5a5; color: #dc2626; padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
-    .scopes { background: #f8f7ff; border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 13px; }
+    .scopes { background: #f8f7ff; border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 13px; color: #374151; }
     .scopes strong { display: block; margin-bottom: 4px; }
   </style>
 </head>
 <body>
   <div class="header">
-    <svg class="logo" width="28" height="28" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><text x="32" y="32" text-anchor="middle" dominant-baseline="central" font-family="Inter,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="60" font-weight="800" fill="#7C3AED">O</text></svg>
-    <h1>OpenSOSData</h1>
+    <div class="brand">Open<span class="sos">SOS</span>Data</div>
   </div>
   <div class="container">
     <div class="card">
