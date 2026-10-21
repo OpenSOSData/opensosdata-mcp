@@ -284,27 +284,29 @@ function renderConsentPage(
   <style>
     @font-face { font-family: 'Inter'; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/fonts/inter-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; font-weight: 400; background: #0D0D14; color: #e5e7eb; min-height: 100vh; display: flex; flex-direction: column; }
-    .header { padding: 16px 24px; display: flex; align-items: center; }
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; font-weight: 400; background: #0a0c12; color: #e5e7eb; min-height: 100vh; display: flex; flex-direction: column; position: relative; }
+    .header { padding: 16px 24px; display: flex; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .brand { font-family: 'Inter', system-ui, -apple-system, sans-serif; font-weight: 800; font-size: 20px; color: #F9FAFB; letter-spacing: -0.01em; }
     .brand .sos { color: #8B5CF6; }
     .container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; }
-    .card { background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.3); padding: 32px; max-width: 420px; width: 100%; color: #1a1a2e; }
-    .card h2 { font-size: 20px; font-weight: 600; margin-bottom: 8px; text-align: center; color: #1a1a2e; }
-    .card p { color: #555; font-size: 14px; margin-bottom: 20px; text-align: center; }
+    .card { background: #15171f; border-radius: 16px; border: 0.5px solid rgba(255,255,255,0.07); box-shadow: 0 4px 24px rgba(0,0,0,0.4); padding: 32px; max-width: 400px; width: 100%; }
+    .card h2 { font-size: 20px; font-weight: 600; margin-bottom: 8px; text-align: center; color: #F9FAFB; }
+    .card p { color: #9499a6; font-size: 14px; margin-bottom: 20px; text-align: center; }
     .client-name { color: #8B5CF6; font-weight: 600; }
-    label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; color: #1a1a2e; }
-    input[type="password"] { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; outline: none; transition: border-color 0.2s; color: #1a1a2e; background: #fff; }
+    label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; color: #F9FAFB; }
+    input[type="password"] { width: 100%; padding: 10px 12px; border: 0.5px solid rgba(255,255,255,0.07); border-radius: 8px; font-size: 14px; font-family: inherit; outline: none; transition: border-color 0.2s; color: #F9FAFB; background: #0a0c12; }
+    input[type="password"]::placeholder { color: #6b7280; }
     input[type="password"]:focus { border-color: #8B5CF6; }
     .btn { display: block; width: 100%; padding: 12px; background: #8B5CF6; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer; margin-top: 16px; transition: background 0.2s; }
     .btn:hover { background: #7C3AED; }
     .btn:disabled { background: #aaa; cursor: not-allowed; }
-    .signup { text-align: center; margin-top: 16px; font-size: 13px; color: #777; }
+    .signup { text-align: center; margin-top: 16px; font-size: 13px; color: #9499a6; }
     .signup a { color: #8B5CF6; text-decoration: none; }
     .signup a:hover { text-decoration: underline; }
-    .error { background: #fef2f2; border: 1px solid #fca5a5; color: #dc2626; padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
-    .scopes { background: #f8f7ff; border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 13px; color: #374151; }
-    .scopes strong { display: block; margin-bottom: 4px; }
+    .error { background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.3); color: #fca5a5; padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
+    .scopes { background: #1e222d; border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 13px; color: #9499a6; }
+    .scopes strong { display: block; margin-bottom: 4px; color: #F9FAFB; }
+    .bottom-glow { position: fixed; bottom: 0; left: 0; right: 0; height: 140px; background: linear-gradient(to top, rgba(139,92,246,0.13), transparent); pointer-events: none; }
   </style>
 </head>
 <body>
@@ -344,6 +346,7 @@ function renderConsentPage(
       btn.textContent = 'Authorizing...';
     });
   </script>
+  <div class="bottom-glow"></div>
 </body>
 </html>`;
 }
