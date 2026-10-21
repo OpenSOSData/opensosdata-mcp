@@ -280,7 +280,7 @@ function renderConsentPage(
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Authorize - OpenSOSData</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext x='32' y='32' text-anchor='middle' dominant-baseline='central' font-family='Inter,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif' font-size='60' font-weight='800' fill='%238B5CF6'%3EO%3C/text%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext x='32' y='32' text-anchor='middle' dominant-baseline='central' font-family='Inter,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif' font-size='60' font-weight='800' fill='%237C3AED'%3EO%3C/text%3E%3C/svg%3E">
   <style>
     @font-face { font-family: 'Inter'; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/fonts/inter-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
