@@ -285,7 +285,7 @@ function renderConsentPage(
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f7; color: #1a1a2e; min-height: 100vh; display: flex; flex-direction: column; }
     .header { background: #09090f; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
     .header h1 { color: #fff; font-size: 18px; font-weight: 600; }
-    .header .logo { color: #7C3AED; font-size: 24px; font-weight: 700; }
+    .header .logo { width: 28px; height: 28px; flex-shrink: 0; }
     .container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; }
     .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 32px; max-width: 420px; width: 100%; }
     .card h2 { font-size: 20px; margin-bottom: 8px; text-align: center; }
@@ -307,7 +307,7 @@ function renderConsentPage(
 </head>
 <body>
   <div class="header">
-    <span class="logo">●</span>
+    <svg class="logo" width="28" height="28" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><text x="32" y="32" text-anchor="middle" dominant-baseline="central" font-family="Inter,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="60" font-weight="800" fill="#7C3AED">O</text></svg>
     <h1>OpenSOSData</h1>
   </div>
   <div class="container">
