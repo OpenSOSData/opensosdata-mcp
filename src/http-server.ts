@@ -95,6 +95,8 @@ app.use(mcpAuthRouter({
 }));
 
 // Parse JSON/URL-encoded for remaining routes
+// Serve static assets (fonts, favicon, etc.) from public/
+app.use(express.static(require('path').join(__dirname, '../public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
