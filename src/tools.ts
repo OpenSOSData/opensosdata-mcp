@@ -152,7 +152,7 @@ export const toolDefinitions = [
       },
       required: ['entity_name', 'state']
     },
-    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false, title: 'Search Business Entity' }
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: true, title: 'Search Business Entity' }
   },
   {
     name: 'list_supported_jurisdictions',
@@ -162,7 +162,7 @@ export const toolDefinitions = [
       properties: {},
       required: [] as string[]
     },
-    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false, title: 'List Supported Jurisdictions' }
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: true, title: 'List Supported Jurisdictions' }
   },
   {
     name: 'check_entity_status',
@@ -181,7 +181,7 @@ export const toolDefinitions = [
       },
       required: ['entity_name', 'state']
     },
-    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false, title: 'Check Entity Status' }
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: true, title: 'Check Entity Status' }
   },
   {
     name: 'batch_search',
@@ -205,7 +205,7 @@ export const toolDefinitions = [
       },
       required: ['searches']
     },
-    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false, title: 'Batch Entity Search' }
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: true, title: 'Batch Entity Search' }
   },
   {
     name: 'get_jurisdictions_for_region',
@@ -244,7 +244,7 @@ export const toolDefinitions = [
       },
       required: ['debtor_name', 'state']
     },
-    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false, title: 'Search UCC Filings' }
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: true, title: 'Search UCC Filings' }
   },
   {
     name: "check_name_availability",
@@ -263,7 +263,7 @@ export const toolDefinitions = [
       },
       required: ["entity_name", "state"]
     },
-    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false, title: 'Check Name Availability' }
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: true, title: 'Check Name Availability' }
   },
   {
     name: 'create_agent_account',
@@ -282,7 +282,7 @@ export const toolDefinitions = [
       },
       required: ['email']
     },
-    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true, title: 'Create Agent Account' }
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true, title: 'Create Agent Account' }
   },
   {
     name: 'top_up_wallet',
@@ -298,7 +298,7 @@ export const toolDefinitions = [
       },
       required: ['tier']
     },
-    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true, title: 'Top Up Wallet' }
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true, title: 'Top Up Wallet' }
   },
   {
     name: 'check_balance',
@@ -308,7 +308,7 @@ export const toolDefinitions = [
       properties: {},
       required: [] as string[]
     },
-    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false, title: 'Check Balance' }
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: true, title: 'Check Balance' }
   }
 ];
 
