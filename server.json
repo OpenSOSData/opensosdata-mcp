@@ -1,26 +1,14 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.opensosdata/mcp-server",
+  "name": "io.github.OpenSOSData/mcp-server",
   "description": "Search US business entity records across all 53 jurisdictions in real time",
+  "version": "1.0.1",
+  "title": "OpenSOSData – US Business Entity Search",
+  "websiteUrl": "https://opensosdata.com",
   "repository": {
     "url": "https://github.com/OpenSOSData/opensosdata-mcp",
     "source": "github"
   },
-  "version_detail": {
-    "version": "1.0.1",
-    "release_date": "2026-10-20",
-    "is_latest": true
-  },
-  "packages": [
-    {
-      "registry_type": "npm",
-      "identifier": "@opensosdata/mcp-server",
-      "version": "1.0.1",
-      "transport": {
-        "type": "stdio"
-      }
-    }
-  ],
   "remotes": [
     {
       "type": "streamable-http",
