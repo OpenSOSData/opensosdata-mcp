@@ -6,6 +6,46 @@ export function getApiKey(): string {
   return process.env.OPENSOSDATA_SERVICE_KEY || process.env.OPENSOSDATA_API_KEY || '';
 }
 
+
+// --- Key Guard: test/diagnostic context protection ---
+function isTestMode(): boolean {
+  return process.env.MCP_TEST_MODE === "true" || process.env.MCP_TEST_MODE === "1";
+}
+
+function getTestKey(): string {
+  return process.env.MCP_TEST_KEY || "";
+}
+
+/**
+ * Guard billed/side-effect tool calls in test mode.
+ * - If MCP_TEST_MODE is active and MCP_TEST_KEY is set, only the test key is allowed.
+ * - If MCP_TEST_MODE is active and MCP_TEST_KEY is NOT set, all calls are refused (fail closed).
+ * - If MCP_TEST_MODE is not active, all calls proceed normally.
+ * Returns an error result if the call should be refused, or null if it should proceed.
+ */
+function guardTestContext(apiKey: string | undefined): { text: string; isError: true } | null {
+  if (!isTestMode()) return null;
+
+  const testKey = getTestKey();
+  if (!testKey) {
+    return {
+      text: "MCP_TEST_MODE is active but MCP_TEST_KEY is not configured. All billed operations are refused (fail-closed). Set MCP_TEST_KEY to a billing-exempt internal key to proceed.",
+      isError: true
+    };
+  }
+
+  const effectiveKey = apiKey || getApiKey();
+  if (effectiveKey !== testKey) {
+    return {
+      text: "MCP_TEST_MODE is active. Only the designated test key may perform lookups. This call was made with a non-test key and has been refused to prevent accidental billing.",
+      isError: true
+    };
+  }
+
+  // Test key matches -- allow the call through
+  return null;
+}
+
 export const VALID_STATES = [
   'AK','AL','AR','AS','AZ','CA','CO','CT','DC','DE','FL','GA','HI','IA','ID',
   'IL','IN','KS','KY','LA','MA','MD','ME','MI','MN','MO','MS','MT','NC','ND',
@@ -314,6 +354,8 @@ export const toolDefinitions = [
 
 export async function handleToolCall(name: string, args: Record<string, any>, apiKey?: string): Promise<{ text: string; isError?: boolean }> {
   if (name === 'search_business_entity') {
+    const guardResult = guardTestContext(apiKey);
+    if (guardResult) return guardResult;
     const { entity_name, state } = args;
     const upper = (state as string).toUpperCase();
     if (!VALID_STATES.includes(upper)) {
@@ -324,17 +366,7 @@ export async function handleToolCall(name: string, args: Record<string, any>, ap
       return { text: `No business entity found matching ${entity_name} in ${upper}.` };
     }
     return {
-      text: JSON.stringify({
-        entityName: result.data.entityName,
-        entityId: result.data.entityId,
-        status: result.data.status,
-        entityType: result.data.entityType,
-        state: upper,
-        registeredAgent: result.data.registeredAgent,
-        address: result.data.address,
-        filingDate: result.data.filingDate,
-        source: result.data.source
-      }, null, 2)
+      text: JSON.stringify({ ...result.data, state: upper }, null, 2)
     };
   }
 
@@ -348,6 +380,8 @@ export async function handleToolCall(name: string, args: Record<string, any>, ap
   }
 
   if (name === 'check_entity_status') {
+    const guardResult = guardTestContext(apiKey);
+    if (guardResult) return guardResult;
     const { entity_name, state } = args;
     const upper = (state as string).toUpperCase();
     if (!VALID_STATES.includes(upper)) {
@@ -361,11 +395,9 @@ export async function handleToolCall(name: string, args: Record<string, any>, ap
     const isActive = status.toLowerCase().includes('active') || status.toLowerCase().includes('good standing');
     return {
       text: JSON.stringify({
-        entityName: result.data.entityName,
+        ...result.data,
         state: upper,
-        status,
         isActive,
-        entityId: result.data.entityId,
         verificationNote: isActive
           ? 'Entity is active and in good standing'
           : 'Entity is not currently active. Verify before transacting.'
@@ -374,6 +406,8 @@ export async function handleToolCall(name: string, args: Record<string, any>, ap
   }
 
   if (name === 'batch_search') {
+    const guardResult = guardTestContext(apiKey);
+    if (guardResult) return guardResult;
     const { searches } = args;
     if (!Array.isArray(searches) || searches.length === 0) {
       return { text: 'No searches provided.', isError: true };
@@ -395,13 +429,7 @@ export async function handleToolCall(name: string, args: Record<string, any>, ap
       return {
         query: s,
         found: true,
-        data: {
-          entityName: r.value.data.entityName,
-          entityId: r.value.data.entityId,
-          status: r.value.data.status,
-          entityType: r.value.data.entityType,
-          state: s.state.toUpperCase()
-        }
+        data: { ...r.value.data, state: s.state.toUpperCase() }
       };
     });
     return { text: JSON.stringify(output, null, 2) };
@@ -421,6 +449,8 @@ export async function handleToolCall(name: string, args: Record<string, any>, ap
   }
 
   if (name === 'search_ucc_filings') {
+    const guardResult = guardTestContext(apiKey);
+    if (guardResult) return guardResult;
     const { debtor_name, state, max_results } = args;
     const upper = (state as string).toUpperCase();
     if (!UCC_SUPPORTED_STATES.includes(upper)) {
@@ -458,6 +488,8 @@ export async function handleToolCall(name: string, args: Record<string, any>, ap
   }
 
   if (name === "check_name_availability") {
+    const guardResult = guardTestContext(apiKey);
+    if (guardResult) return guardResult;
     const { entity_name, state } = args;
     const upper = (state as string).toUpperCase();
     if (!VALID_STATES.includes(upper)) {
@@ -476,22 +508,14 @@ export async function handleToolCall(name: string, args: Record<string, any>, ap
     if (!data.success && data.error) {
       return { text: `Error: ${data.error}`, isError: true };
     }
-    const status = data.available ? "✅ Available" : "❌ Name Taken";
-    let result = `${status}\n\nSearched: "${data.searchedName}" in ${data.state}\n`;
-    if (data.statusNote) result += `\nℹ️  ${data.statusNote}\n`;
-    if (data.variationNote) result += `\n⚠️  ${data.variationNote}\n`;
-    if (data.warning) result += `\n🔴 ${data.warning}\n`;
-    if (data.conflictingEntities?.length > 0) {
-      result += `\nSimilar Name Records Found:\n`;
-      data.conflictingEntities.forEach((e: any) => {
-        result += `• ${e.entityName} — ${e.status || "Unknown"} (${e.entityId})\n`;
-      });
-    }
-    result += `\nCost: ${data.cost} | Balance: ${data.walletBalance}`;
-    return { text: result };
+    return {
+      text: JSON.stringify({ ...data, state: upper }, null, 2)
+    };
   }
 
   if (name === 'create_agent_account') {
+    const guardResult = guardTestContext(apiKey);
+    if (guardResult) return guardResult;
     const { email, name: accountName } = args;
     if (!email || typeof email !== 'string') {
       return { text: 'Email is required to create an agent account.', isError: true };
@@ -529,6 +553,8 @@ export async function handleToolCall(name: string, args: Record<string, any>, ap
   }
 
   if (name === 'top_up_wallet') {
+    const guardResult = guardTestContext(apiKey);
+    if (guardResult) return guardResult;
     const { tier } = args;
     const validTiers = ['starter', 'growth', 'scale', 'enterprise'];
     if (!tier || !validTiers.includes(tier)) {
